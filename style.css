@@ -1,0 +1,39 @@
+* {
+  box-sizing: border-box;
+  border: 0;
+  margin: 0;
+}
+
+body {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 70px auto 50px;
+}
+
+header {
+  background-color: #ff6d60;
+}
+
+main {
+  display: flex;
+  background-color: #f3e99f;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  display: grid;
+  width: 400px;
+  height: 400px;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 10px 0px;
+}
+
+.cell {
+  background-color: #d34b4b;
+}
+footer {
+  background-color: #98d8aa;
+}

@@ -1,15 +1,6 @@
 "use-strict";
 
-const objCond = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-];
+// Event Listeners
 
 const gameBoard = (function () {
   const boardArr = ["", "", "", "", "", "", "", "", ""];
@@ -40,6 +31,9 @@ const gameController = (function () {
     gameBoard.display();
   };
 
+  const declareWinner = function (winner) {
+    console.log("The winner is Player ", winner);
+  };
   const getCurrentPlayerSign = function () {
     if (player1.turn === true) {
       return player1.sign;
@@ -68,30 +62,31 @@ const gameController = (function () {
     }
   };
 
+  const winCond = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
   // Checking the status of the game after each move
-  const checkGameStatus = function () {
+  const checkGameStatus = function (i) {
+    const index = Number(i);
     const tempArr = gameBoard.boardArr;
     let flag = true;
     let currentPlayerSign = getCurrentPlayerSign();
 
-    for (const item of objCond) {
-      item.forEach((el) => {
-        if (tempArr[el] === currentPlayerSign) {
-          flag = true;
-        } else {
-          flag = false;
-        }
+    return winCond
+      .filter((item) => item.includes(index))
+      .some((combinations) => {
+        return combinations.every((index) => {
+          return tempArr[index] === currentPlayerSign;
+        });
       });
-      if (flag === true) {
-        break;
-      }
-    }
-
-    if (flag === true) {
-      return true;
-    } else {
-      return false;
-    }
   };
 
   const makeMove = function (index) {
@@ -101,9 +96,9 @@ const gameController = (function () {
     if (player1.turn) {
       gameBoard.boardArr[index] = player1.sign;
       gameBoard.markCell(index);
-      const status = checkGameStatus();
+      const status = checkGameStatus(index);
       if (status) {
-        console.log("Won");
+        declareWinner(1);
       }
 
       flipTurn(1);
@@ -113,6 +108,10 @@ const gameController = (function () {
       gameBoard.boardArr[index] = player2.sign;
       gameBoard.markCell(index);
       checkGameStatus();
+      const status = checkGameStatus(index);
+      if (status) {
+        declareWinner(2);
+      }
       flipTurn(2);
       return;
     }
@@ -120,14 +119,25 @@ const gameController = (function () {
   return { startGame, makeMove };
 })();
 
+const boardListeners = (function () {
+  // Elements
+  const boardCellContainer = document.querySelector(".container");
+
+  boardCellContainer.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("cell")) return;
+    const cellNumber = e.target.dataset["cellnumber"];
+    gameController.makeMove(cellNumber);
+    console.log(gameBoard.boardArr);
+  });
+})();
 gameController.startGame();
-gameController.makeMove(0); //X
-gameController.makeMove(4); //O
-gameController.makeMove(1); //X
-gameController.makeMove(8); //o
-gameController.makeMove(2);
-gameController.makeMove(3);
-gameController.makeMove(6);
-gameController.makeMove(7);
-gameController.makeMove(5);
-// console.log(gameBoard.boardArr);
+// gameController.makeMove(0); //X
+// gameController.makeMove(4); //O
+// gameController.makeMove(1); //X
+// gameController.makeMove(8); //o
+// gameController.makeMove(2);
+// gameController.makeMove(3);
+// gameController.makeMove(6);
+// gameController.makeMove(7);
+// gameController.makeMove(5);
+// // console.log(gameBoard.boardArr);
