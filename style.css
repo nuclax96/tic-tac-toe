@@ -53,9 +53,6 @@ main {
   background-color: #62d382;
   color: #050000;
 }
-.cell.win:hover {
-  background-color: #98d8aa;
-}
 
 .cell:hover {
   background-color: #ff6d60;
