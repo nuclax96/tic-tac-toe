@@ -13,7 +13,7 @@
 body {
   height: 100vh;
   display: grid;
-  grid-template-rows: 70px auto 50px;
+  grid-template-rows: 70px auto 30px;
 }
 
 header {
@@ -22,9 +22,11 @@ header {
 
 main {
   display: flex;
+  flex-direction: column;
   background-color: #f3e99f;
   justify-content: center;
   align-items: center;
+  gap: 30px;
 }
 
 .container {
@@ -44,6 +46,19 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 300ms;
+  border-radius: 4px;
+}
+.cell.win {
+  background-color: #62d382;
+  color: #050000;
+}
+.cell.win:hover {
+  background-color: #98d8aa;
+}
+
+.cell:hover {
+  background-color: #ff6d60;
 }
 footer {
   background-color: #98d8aa;

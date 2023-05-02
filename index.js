@@ -1,6 +1,7 @@
 "use-strict";
 
 const gameBoard = (function () {
+  let gameOver = false;
   let boardArr = ["", "", "", "", "", "", "", "", ""];
   const display = function () {
     for (let i = 0; i < 3; i++) {
@@ -11,26 +12,38 @@ const gameBoard = (function () {
     }
   };
   const markCell = function (element) {
+    if (element.textContent !== "") return;
     element.textContent = gameController.getCurrentPlayerSign();
   };
   const resetTurn = function () {
     player1.turn = true;
     player2.turn = false;
   };
+  const highlightCells = function (arr) {
+    const cells = document.querySelectorAll(".cell");
+    const tempArr = [];
+    cells.forEach((e) => {
+      if (arr.includes(Number(e.dataset["cellnumber"]))) {
+        e.classList.add("win");
+      }
+    });
+  };
 
   const newGame = function () {
-    boardArr = boardArr.map((item) => {
+    const statusHeading = document.querySelector(".status-heading");
+    statusHeading.textContent = "Start";
+    gameBoard.boardArr = boardArr.map((item) => {
       return "";
     });
+    gameBoard.gameOver = false;
     resetTurn();
-    console.log(boardArr);
     const cells = document.querySelectorAll(".cell");
-
     cells.forEach((item) => {
+      item.classList.remove("win");
       item.textContent = "";
     });
   };
-  return { boardArr, display, newGame, markCell };
+  return { boardArr, display, newGame, markCell, gameOver, highlightCells };
 })();
 
 const Player = function (name, sign, Ai, turn, playerNumber) {
@@ -46,8 +59,12 @@ const gameController = (function () {
     gameBoard.display();
   };
 
-  const declareWinner = function (winner) {
-    console.log("The winner is Player ", winner);
+  let passedCombination = [];
+
+  const declareWinner = function (winner, winCells) {
+    const statusHeading = document.querySelector(".status-heading");
+    gameBoard.gameOver = true;
+    statusHeading.textContent = `The winner is Player ${winner}`;
   };
   const getCurrentPlayerSign = function () {
     if (player1.turn === true) {
@@ -100,15 +117,17 @@ const gameController = (function () {
   const checkGameStatus = function (i) {
     const index = Number(i);
     const tempArr = gameBoard.boardArr;
-    let flag = true;
     let currentPlayerSign = getCurrentPlayerSign();
-
     return winCond
       .filter((item) => item.includes(index))
       .some((combinations) => {
-        return combinations.every((index) => {
+        let flag = combinations.every((index) => {
           return tempArr[index] === currentPlayerSign;
         });
+        if (flag === true) {
+          passedCombination = combinations;
+        }
+        return flag;
       });
   };
 
@@ -119,8 +138,10 @@ const gameController = (function () {
     if (player1.turn) {
       gameBoard.boardArr[index] = player1.sign;
       const status = checkGameStatus(index);
+
       if (status) {
         declareWinner(1);
+        gameBoard.highlightCells(passedCombination);
       }
 
       return;
@@ -131,6 +152,7 @@ const gameController = (function () {
       const status = checkGameStatus(index);
       if (status) {
         declareWinner(2);
+        gameBoard.highlightCells(passedCombination);
       }
       return;
     }
@@ -153,6 +175,7 @@ const boardListeners = (function () {
   newGameBtn.addEventListener("click", gameBoard.newGame);
 
   boardCellContainer.addEventListener("click", (e) => {
+    if (gameBoard.gameOver) return;
     if (!e.target.classList.contains("cell")) return;
     const cellNumber = e.target.dataset["cellnumber"];
     const playerNumber = gameController.getCurrentPlayerNumber();
@@ -162,13 +185,3 @@ const boardListeners = (function () {
   });
 })();
 gameController.startGame();
-// gameController.makeMove(0); //X
-// gameController.makeMove(4); //O
-// gameController.makeMove(1); //X
-// gameController.makeMove(8); //o
-// gameController.makeMove(2);
-// gameController.makeMove(3);
-// gameController.makeMove(6);
-// gameController.makeMove(7);
-// gameController.makeMove(5);
-// // console.log(gameBoard.boardArr);
