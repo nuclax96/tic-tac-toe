@@ -3,7 +3,13 @@
   border: 0;
   margin: 0;
 }
-
+.header-nav {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  align-items: center;
+  height: 100%;
+}
 body {
   height: 100vh;
   display: grid;
@@ -33,6 +39,11 @@ main {
 
 .cell {
   background-color: #d34b4b;
+  font-size: 36px;
+  color: aliceblue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 footer {
   background-color: #98d8aa;

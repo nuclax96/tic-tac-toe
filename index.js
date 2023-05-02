@@ -1,9 +1,7 @@
 "use-strict";
 
-// Event Listeners
-
 const gameBoard = (function () {
-  const boardArr = ["", "", "", "", "", "", "", "", ""];
+  let boardArr = ["", "", "", "", "", "", "", "", ""];
   const display = function () {
     for (let i = 0; i < 3; i++) {
       for (let j = 0; j < 3; j++) {
@@ -12,18 +10,35 @@ const gameBoard = (function () {
       //   console.log("Line break");
     }
   };
-  const markCell = function () {};
+  const markCell = function (element) {
+    element.textContent = gameController.getCurrentPlayerSign();
+  };
+  const resetTurn = function () {
+    player1.turn = true;
+    player2.turn = false;
+  };
 
-  const resetBoard = function () {};
-  return { boardArr, display, resetBoard, markCell };
+  const newGame = function () {
+    boardArr = boardArr.map((item) => {
+      return "";
+    });
+    resetTurn();
+    console.log(boardArr);
+    const cells = document.querySelectorAll(".cell");
+
+    cells.forEach((item) => {
+      item.textContent = "";
+    });
+  };
+  return { boardArr, display, newGame, markCell };
 })();
 
-const Player = function (name, sign, Ai, turn) {
-  return { name, sign, Ai, turn };
+const Player = function (name, sign, Ai, turn, playerNumber) {
+  return { name, sign, Ai, turn, playerNumber };
 };
 
-const player1 = Player("Player1", "X", false, true);
-const player2 = Player("Player2", "O", false, false);
+const player1 = Player("Player1", "X", false, true, 1);
+const player2 = Player("Player2", "O", false, false, 2);
 
 const gameController = (function () {
   const startGame = function () {
@@ -43,6 +58,14 @@ const gameController = (function () {
     }
   };
 
+  const getCurrentPlayerNumber = function () {
+    if (player1.turn) {
+      return 1;
+    }
+    if (player2.turn) {
+      return 2;
+    }
+  };
   const flipTurn = function (currPlayer) {
     if (currPlayer === 1) {
       player1.turn = false;
@@ -95,39 +118,47 @@ const gameController = (function () {
     }
     if (player1.turn) {
       gameBoard.boardArr[index] = player1.sign;
-      gameBoard.markCell(index);
       const status = checkGameStatus(index);
       if (status) {
         declareWinner(1);
       }
 
-      flipTurn(1);
       return;
     }
     if (player2.turn) {
       gameBoard.boardArr[index] = player2.sign;
-      gameBoard.markCell(index);
       checkGameStatus();
       const status = checkGameStatus(index);
       if (status) {
         declareWinner(2);
       }
-      flipTurn(2);
       return;
     }
   };
-  return { startGame, makeMove };
+  return {
+    startGame,
+    makeMove,
+    getCurrentPlayerSign,
+    flipTurn,
+    getCurrentPlayerNumber,
+  };
 })();
 
 const boardListeners = (function () {
   // Elements
   const boardCellContainer = document.querySelector(".container");
+  const newGameBtn = document.querySelector(".new-game-btn");
+
+  //Listeners
+  newGameBtn.addEventListener("click", gameBoard.newGame);
 
   boardCellContainer.addEventListener("click", (e) => {
     if (!e.target.classList.contains("cell")) return;
     const cellNumber = e.target.dataset["cellnumber"];
+    const playerNumber = gameController.getCurrentPlayerNumber();
     gameController.makeMove(cellNumber);
-    console.log(gameBoard.boardArr);
+    gameBoard.markCell(e.target);
+    gameController.flipTurn(playerNumber);
   });
 })();
 gameController.startGame();
