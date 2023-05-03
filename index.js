@@ -66,6 +66,11 @@ const gameController = (function () {
     gameBoard.gameOver = true;
     statusHeading.textContent = `The winner is Player ${winner}`;
   };
+
+  const changeStatusHeading = function (text) {
+    const statusHeading = document.querySelector(".status-heading");
+    statusHeading.textContent = `${text}`;
+  };
   const getCurrentPlayerSign = function () {
     if (player1.turn === true) {
       return player1.sign;
@@ -131,6 +136,17 @@ const gameController = (function () {
       });
   };
 
+  const checkDraw = function () {
+    let draw = true;
+    gameBoard.boardArr.forEach((item) => {
+      if (item === "") {
+        draw = false;
+      }
+    });
+    return draw;
+  };
+
+  // Improve this function
   const makeMove = function (index) {
     if (!isValidMove(index)) {
       return;
@@ -142,6 +158,10 @@ const gameController = (function () {
       if (status) {
         declareWinner(1);
         gameBoard.highlightCells(passedCombination);
+        return;
+      }
+      if (checkDraw()) {
+        changeStatusHeading("Draw");
       }
 
       return;
@@ -153,6 +173,10 @@ const gameController = (function () {
       if (status) {
         declareWinner(2);
         gameBoard.highlightCells(passedCombination);
+        return;
+      }
+      if (checkDraw()) {
+        changeStatusHeading("Draw");
       }
       return;
     }
