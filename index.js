@@ -1,17 +1,15 @@
 "use-strict";
+let gameMode = 1;
+const huPlayer = "O";
+const aiPlayer = "X";
+let passedCombination = [];
 
 const gameBoard = (function () {
   let gameOver = false;
-  let boardArr = ["", "", "", "", "", "", "", "", ""];
-  const display = function () {
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        // console.log(boardArr[3 * i + j]);
-      }
-      //   console.log("Line break");
-    }
-  };
+  let boardArr = ["0", "1", "2", "3", "4", "5", "6", "7", "8"];
+
   const markCell = function (element) {
+    if (!element) return;
     if (element.textContent !== "") return;
     element.textContent = gameController.getCurrentPlayerSign();
   };
@@ -32,9 +30,7 @@ const gameBoard = (function () {
   const newGame = function () {
     const statusHeading = document.querySelector(".status-heading");
     statusHeading.textContent = "Start";
-    gameBoard.boardArr = boardArr.map((item) => {
-      return "";
-    });
+    gameBoard.boardArr = ["0", "1", "2", "3", "4", "5", "6", "7", "8"];
     gameBoard.gameOver = false;
     resetTurn();
     const cells = document.querySelectorAll(".cell");
@@ -43,23 +39,41 @@ const gameBoard = (function () {
       item.textContent = "";
     });
   };
-  return { boardArr, display, newGame, markCell, gameOver, highlightCells };
+
+  const getFreeCells = function (arr) {
+    const tempArr = arr.filter((item) => {
+      if (item.match(/[0-9]/g)) {
+        return true;
+      }
+    });
+    return tempArr;
+  };
+  return {
+    boardArr,
+    getFreeCells,
+    newGame,
+    markCell,
+    gameOver,
+    highlightCells,
+  };
 })();
 
 const Player = function (name, sign, Ai, turn, playerNumber) {
   return { name, sign, Ai, turn, playerNumber };
 };
 
-const player1 = Player("Player1", "X", false, true, 1);
-const player2 = Player("Player2", "O", false, false, 2);
+const player1 = Player("Player1", "O", false, true, 1);
+let player2;
+// const PlayerAI = Player("PlayerAI", "O", true, false, 2);
 
 const gameController = (function () {
-  const startGame = function () {
-    console.log("Game Started");
-    gameBoard.display();
+  const startGame = function (mode) {
+    if (mode === 1) {
+      player2 = new Player("Player2", "X", true, false, 2);
+    } else if (mode === 2) {
+      player2 = new Player("Player2", "X", false, false, 2);
+    }
   };
-
-  let passedCombination = [];
 
   const declareWinner = function (winner, winCells) {
     const statusHeading = document.querySelector(".status-heading");
@@ -99,8 +113,10 @@ const gameController = (function () {
     }
   };
   const isValidMove = function (index) {
-    if (gameBoard.boardArr[index] !== "") {
-      console.log("Wrong Move");
+    if (
+      gameBoard.boardArr[index] === "O" ||
+      gameBoard.boardArr[index] === "X"
+    ) {
       return false;
     } else {
       return true;
@@ -119,7 +135,7 @@ const gameController = (function () {
   ];
 
   // Checking the status of the game after each move
-  const checkGameStatus = function (i) {
+  const checkGameStatus = function (board, i) {
     const index = Number(i);
     const tempArr = gameBoard.boardArr;
     let currentPlayerSign = getCurrentPlayerSign();
@@ -139,7 +155,7 @@ const gameController = (function () {
   const checkDraw = function () {
     let draw = true;
     gameBoard.boardArr.forEach((item) => {
-      if (item === "") {
+      if (item.match(/[0-9]/g)) {
         draw = false;
       }
     });
@@ -168,7 +184,6 @@ const gameController = (function () {
     }
     if (player2.turn) {
       gameBoard.boardArr[index] = player2.sign;
-      checkGameStatus();
       const status = checkGameStatus(index);
       if (status) {
         declareWinner(2);
@@ -182,12 +197,92 @@ const gameController = (function () {
     }
   };
   return {
+    winCond,
     startGame,
     makeMove,
     getCurrentPlayerSign,
     flipTurn,
     getCurrentPlayerNumber,
+    checkGameStatus,
+    declareWinner,
+    passedCombination,
   };
+})();
+
+const methodsAI = (function () {
+  const bestMove = function () {
+    return miniMax(gameBoard.boardArr, aiPlayer);
+  };
+
+  const checkWin = function (arr, sign) {
+    let passedCombination = [];
+
+    const tempArr = arr;
+    let currentPlayerSign = sign;
+    return gameController.winCond.some((combinations) => {
+      let flag = combinations.every((index) => {
+        return tempArr[index] === currentPlayerSign;
+      });
+      if (flag === true) {
+        passedCombination = combinations;
+      }
+      return flag;
+    });
+  };
+
+  const miniMax = function (newBoard, player) {
+    let availSpots = gameBoard.getFreeCells(newBoard);
+
+    if (checkWin(newBoard, huPlayer)) {
+      return { score: -10 };
+    } else if (checkWin(newBoard, aiPlayer)) {
+      return { score: 10 };
+    } else if (availSpots.length === 0) {
+      return { score: 0 };
+    }
+    //Collect each of the scores from the empty spots
+
+    let moves = [];
+
+    for (let i = 0; i < availSpots.length; i++) {
+      let move = {};
+      move.index = newBoard[availSpots[i]];
+      newBoard[availSpots[i]] = player;
+
+      if (player == aiPlayer) {
+        let result = miniMax(newBoard, huPlayer);
+        move.score = result.score;
+      } else {
+        let result = miniMax(newBoard, aiPlayer);
+        move.score = result.score;
+      }
+
+      newBoard[availSpots[i]] = move.index;
+      moves.push(move);
+    }
+
+    let bestMove;
+    if (player === aiPlayer) {
+      let bestScore = -10000;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i].score > bestScore) {
+          bestScore = moves[i].score;
+          bestMove = i;
+        }
+      }
+    } else {
+      let bestScore = 10000;
+      for (let i = 0; i < moves.length; i++) {
+        if (moves[i].score < bestScore) {
+          bestScore = moves[i].score;
+          bestMove = i;
+        }
+      }
+    }
+    return moves[bestMove];
+  };
+
+  return { bestMove, miniMax };
 })();
 
 const boardListeners = (function () {
@@ -202,10 +297,39 @@ const boardListeners = (function () {
     if (gameBoard.gameOver) return;
     if (!e.target.classList.contains("cell")) return;
     const cellNumber = e.target.dataset["cellnumber"];
-    const playerNumber = gameController.getCurrentPlayerNumber();
+    let playerNumber = gameController.getCurrentPlayerNumber();
     gameController.makeMove(cellNumber);
     gameBoard.markCell(e.target);
     gameController.flipTurn(playerNumber);
+
+    //Game Mode ===1 means AI turn
+    if (gameMode === 1) {
+      playerNumber = 2;
+      //   const index = methodsAI.bestMove().index;
+      const index = methodsAI.bestMove().index;
+      gameController.makeMove(index);
+      const cellEl = document.querySelectorAll(".cell");
+      let updateEl;
+      cellEl.forEach((item) => {
+        if (item.dataset["cellnumber"] === index) {
+          updateEl = item;
+        }
+      });
+
+      gameBoard.markCell(updateEl);
+
+      const status = gameController.checkGameStatus(gameBoard.boardArr, index);
+      gameController.flipTurn(playerNumber);
+
+      if (status) {
+        gameController.declareWinner(2);
+        gameBoard.highlightCells(passedCombination);
+        return;
+      }
+
+      // What to do with the returnred index ?????
+      return;
+    }
   });
 })();
-gameController.startGame();
+gameController.startGame(gameMode);
