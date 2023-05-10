@@ -69,7 +69,7 @@ let player2;
 const gameController = (function () {
   const startGame = function (mode) {
     if (mode === 1) {
-      player2 = new Player("Player2", "X", true, false, 2);
+      player2 = new Player("AI", "X", true, false, 2);
     } else if (mode === 2) {
       player2 = new Player("Player2", "X", false, false, 2);
     }
@@ -78,7 +78,7 @@ const gameController = (function () {
   const declareWinner = function (winner, winCells) {
     const statusHeading = document.querySelector(".status-heading");
     gameBoard.gameOver = true;
-    statusHeading.textContent = `The winner is Player ${winner}`;
+    statusHeading.textContent = `The winner is ${winner}`;
   };
 
   const changeStatusHeading = function (text) {
@@ -164,15 +164,12 @@ const gameController = (function () {
 
   // Improve this function
   const makeMove = function (index) {
-    if (!isValidMove(index)) {
-      return;
-    }
     if (player1.turn) {
       gameBoard.boardArr[index] = player1.sign;
       const status = checkGameStatus(index);
 
       if (status) {
-        declareWinner(1);
+        declareWinner(player1.name);
         gameBoard.highlightCells(passedCombination);
         return;
       }
@@ -186,7 +183,7 @@ const gameController = (function () {
       gameBoard.boardArr[index] = player2.sign;
       const status = checkGameStatus(index);
       if (status) {
-        declareWinner(2);
+        declareWinner(player2.name);
         gameBoard.highlightCells(passedCombination);
         return;
       }
@@ -206,6 +203,7 @@ const gameController = (function () {
     checkGameStatus,
     declareWinner,
     passedCombination,
+    isValidMove,
   };
 })();
 
@@ -215,8 +213,6 @@ const methodsAI = (function () {
   };
 
   const checkWin = function (arr, sign) {
-    let passedCombination = [];
-
     const tempArr = arr;
     let currentPlayerSign = sign;
     return gameController.winCond.some((combinations) => {
@@ -233,6 +229,7 @@ const methodsAI = (function () {
   const miniMax = function (newBoard, player) {
     let availSpots = gameBoard.getFreeCells(newBoard);
 
+    //Terminal Nodes conditions
     if (checkWin(newBoard, huPlayer)) {
       return { score: -10 };
     } else if (checkWin(newBoard, aiPlayer)) {
@@ -297,6 +294,9 @@ const boardListeners = (function () {
     if (gameBoard.gameOver) return;
     if (!e.target.classList.contains("cell")) return;
     const cellNumber = e.target.dataset["cellnumber"];
+    if (!gameController.isValidMove(cellNumber)) {
+      return;
+    }
     let playerNumber = gameController.getCurrentPlayerNumber();
     gameController.makeMove(cellNumber);
     gameBoard.markCell(e.target);
@@ -305,7 +305,7 @@ const boardListeners = (function () {
     //Game Mode ===1 means AI turn
     if (gameMode === 1) {
       playerNumber = 2;
-      //   const index = methodsAI.bestMove().index;
+      //Minimax gives the next index to be marked;
       const index = methodsAI.bestMove().index;
       gameController.makeMove(index);
       const cellEl = document.querySelectorAll(".cell");
@@ -322,7 +322,7 @@ const boardListeners = (function () {
       gameController.flipTurn(playerNumber);
 
       if (status) {
-        gameController.declareWinner(2);
+        gameController.declareWinner(player2.name);
         gameBoard.highlightCells(passedCombination);
         return;
       }
