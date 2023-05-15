@@ -1,8 +1,29 @@
 "use-strict";
 let gameMode = 1;
+let gameStarted = 0;
 const huPlayer = "O";
 const aiPlayer = "X";
 let passedCombination = [];
+let player2;
+
+const formOpponent = document.querySelector(".container-opp-labels");
+
+formOpponent.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  if (gameMode === 1) {
+    player1.name = formData.get("Player1");
+    gameController.changeStatusHeading(player1.name, "AI");
+    gameStarted = 1;
+  } else {
+    player1.name = formData.get("Player1");
+    player2.name = formData.get("Player2");
+
+    player2.Ai = false;
+    gameController.changeStatusHeading(player1.name, player2.name);
+    gameStarted = 1;
+  }
+});
 
 const gameBoard = (function () {
   let gameOver = false;
@@ -29,7 +50,8 @@ const gameBoard = (function () {
 
   const newGame = function () {
     const statusHeading = document.querySelector(".status-heading");
-    statusHeading.textContent = "Start";
+    statusHeading.textContent = "Select Opponent";
+    gameStarted = 0;
     gameBoard.boardArr = ["0", "1", "2", "3", "4", "5", "6", "7", "8"];
     gameBoard.gameOver = false;
     resetTurn();
@@ -63,8 +85,6 @@ const Player = function (name, sign, Ai, turn, playerNumber) {
 };
 
 const player1 = Player("Player1", "O", false, true, 1);
-let player2;
-// const PlayerAI = Player("PlayerAI", "O", true, false, 2);
 
 const gameController = (function () {
   const startGame = function (mode) {
@@ -81,9 +101,13 @@ const gameController = (function () {
     statusHeading.textContent = `The winner is ${winner}`;
   };
 
-  const changeStatusHeading = function (text) {
+  const changeStatusHeading = function (op1, op2) {
     const statusHeading = document.querySelector(".status-heading");
-    statusHeading.textContent = `${text}`;
+    if (op2) {
+      statusHeading.textContent = `${op1} vs ${op2}`;
+      return;
+    }
+    statusHeading.textContent = `${op1}`;
   };
   const getCurrentPlayerSign = function () {
     if (player1.turn === true) {
@@ -135,7 +159,7 @@ const gameController = (function () {
   ];
 
   // Checking the status of the game after each move
-  const checkGameStatus = function (board, i) {
+  const checkGameStatus = function (i) {
     const index = Number(i);
     const tempArr = gameBoard.boardArr;
     let currentPlayerSign = getCurrentPlayerSign();
@@ -204,6 +228,7 @@ const gameController = (function () {
     declareWinner,
     passedCombination,
     isValidMove,
+    changeStatusHeading,
   };
 })();
 
@@ -286,11 +311,80 @@ const boardListeners = (function () {
   // Elements
   const boardCellContainer = document.querySelector(".container");
   const newGameBtn = document.querySelector(".new-game-btn");
-
+  const btnOpponent = document.querySelectorAll(".btn-opponent");
+  const sideBarContainer = document.querySelector(".main-sidebar");
+  const lablesOppContainer = document.querySelector(".container-opp-labels");
   //Listeners
   newGameBtn.addEventListener("click", gameBoard.newGame);
+  // Clean this function
+  btnOpponent.forEach((item) => {
+    item.addEventListener("click", (e) => {
+      while (lablesOppContainer.firstChild) {
+        lablesOppContainer.removeChild(lablesOppContainer.lastChild);
+      }
+      btnOpponent.forEach((items) => {
+        items.classList.remove("active");
+      });
+      if (e.target.dataset["opp"] == "AI") {
+        gameMode = 1;
+        e.target.classList.add("active");
+        //Insert name field
+        const labelHuName = document.createElement("label");
+        const inputHuName = document.createElement("input");
+        const btnSubmit = document.createElement("button");
+
+        inputHuName.type = "text";
+        labelHuName.textContent = "Enter Player 1 Name";
+        labelHuName.setAttribute("for", "Player1");
+        inputHuName.name = "Player1";
+        btnSubmit.textContent = "Start";
+        btnSubmit.type = "submit";
+
+        inputHuName.required = true;
+        inputHuName.setAttribute("id", "Player1");
+        inputHuName.setAttribute("name", "Player1");
+        lablesOppContainer.appendChild(labelHuName);
+        lablesOppContainer.appendChild(inputHuName);
+        lablesOppContainer.appendChild(btnSubmit);
+      } else {
+        gameMode = 2;
+        e.target.classList.add("active");
+
+        const labelHuName1 = document.createElement("label");
+        const labelHuName2 = document.createElement("label");
+        const inputHuName1 = document.createElement("input");
+        const inputHuName2 = document.createElement("input");
+        const btnSubmit = document.createElement("button");
+
+        inputHuName1.type = "text";
+        labelHuName1.textContent = "Enter Player 1 Name";
+        labelHuName1.setAttribute("for", "Player1");
+        inputHuName1.setAttribute("id", "Player1");
+        inputHuName1.setAttribute("name", "Player1");
+        inputHuName1.required = true;
+
+        inputHuName2.type = "text";
+        labelHuName2.textContent = "Enter Player 2 Name";
+        labelHuName2.textContent = "Enter Player 2 Name";
+        labelHuName2.setAttribute("for", "Player2");
+        inputHuName2.setAttribute("id", "Player2");
+        inputHuName2.setAttribute("name", "Player2");
+        inputHuName2.required = true;
+
+        btnSubmit.textContent = "Start";
+        btnSubmit.type = "submit";
+        lablesOppContainer.appendChild(labelHuName1);
+        lablesOppContainer.appendChild(inputHuName1);
+        lablesOppContainer.appendChild(labelHuName2);
+        lablesOppContainer.appendChild(inputHuName2);
+        lablesOppContainer.appendChild(btnSubmit);
+      }
+    });
+  });
 
   boardCellContainer.addEventListener("click", (e) => {
+    if (!gameStarted) return;
+
     if (gameBoard.gameOver) return;
     if (!e.target.classList.contains("cell")) return;
     const cellNumber = e.target.dataset["cellnumber"];
