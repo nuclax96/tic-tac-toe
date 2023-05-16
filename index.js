@@ -13,6 +13,7 @@ formOpponent.addEventListener("submit", (e) => {
   const formData = new FormData(e.target);
   if (gameMode === 1) {
     player1.name = formData.get("Player1");
+    player2.name = "AI";
     gameController.changeStatusHeading(player1.name, "AI");
     gameStarted = 1;
   } else {
@@ -312,7 +313,7 @@ const boardListeners = (function () {
   const boardCellContainer = document.querySelector(".container");
   const newGameBtn = document.querySelector(".new-game-btn");
   const btnOpponent = document.querySelectorAll(".btn-opponent");
-  const sideBarContainer = document.querySelector(".main-sidebar");
+  //   const sideBarContainer = document.querySelector(".main-sidebar");
   const lablesOppContainer = document.querySelector(".container-opp-labels");
   //Listeners
   newGameBtn.addEventListener("click", gameBoard.newGame);
@@ -336,9 +337,12 @@ const boardListeners = (function () {
         inputHuName.type = "text";
         labelHuName.textContent = "Enter Player 1 Name";
         labelHuName.setAttribute("for", "Player1");
+        labelHuName.classList.add("opponent-label");
         inputHuName.name = "Player1";
+        inputHuName.classList.add("opponent-input");
         btnSubmit.textContent = "Start";
         btnSubmit.type = "submit";
+        btnSubmit.classList.add("btn-start");
 
         inputHuName.required = true;
         inputHuName.setAttribute("id", "Player1");
@@ -358,6 +362,10 @@ const boardListeners = (function () {
 
         inputHuName1.type = "text";
         labelHuName1.textContent = "Enter Player 1 Name";
+        labelHuName1.classList.add("opponent-label");
+        inputHuName1.classList.add("opponent-input");
+        inputHuName2.classList.add("opponent-input");
+
         labelHuName1.setAttribute("for", "Player1");
         inputHuName1.setAttribute("id", "Player1");
         inputHuName1.setAttribute("name", "Player1");
@@ -366,6 +374,8 @@ const boardListeners = (function () {
         inputHuName2.type = "text";
         labelHuName2.textContent = "Enter Player 2 Name";
         labelHuName2.textContent = "Enter Player 2 Name";
+        labelHuName2.classList.add("opponent-label");
+
         labelHuName2.setAttribute("for", "Player2");
         inputHuName2.setAttribute("id", "Player2");
         inputHuName2.setAttribute("name", "Player2");
@@ -373,6 +383,8 @@ const boardListeners = (function () {
 
         btnSubmit.textContent = "Start";
         btnSubmit.type = "submit";
+        btnSubmit.classList.add("btn-start");
+
         lablesOppContainer.appendChild(labelHuName1);
         lablesOppContainer.appendChild(inputHuName1);
         lablesOppContainer.appendChild(labelHuName2);

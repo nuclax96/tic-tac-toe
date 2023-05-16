@@ -88,8 +88,9 @@ footer {
 .main-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  margin-left: 18px;
+  /* gap: 18px; */
+  /* margin-left: 36px; */
+  align-items: center;
 }
 .active {
   background-color: #62d382;
@@ -117,4 +118,43 @@ footer {
   flex-direction: column;
   gap: 8px;
   margin-top: 44px;
+}
+.opponent-heading {
+  font-size: 24px;
+  color: #ff6d60;
+}
+
+.btn-opponent {
+  font-size: 18px;
+  width: 100px;
+}
+.btn-opponent:hover {
+  background-color: #98d8aa;
+  transition: all 400ms ease;
+}
+.btn-opponent:nth-child(2) {
+  margin-left: 18px;
+}
+
+.opponent-label {
+  font-size: 18px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.btn-start {
+  width: 40%;
+  font-size: 18px;
+  padding: 12px;
+  border-radius: 8px;
+}
+.btn-start:hover {
+  background-color: #98d8aa;
+  transition: all 400ms ease;
+}
+.opponent-input {
+  width: 50%;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
 }
